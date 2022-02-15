@@ -1,1 +1,1 @@
-[Nothing here!](https://youareanidiot.cc/)
+[Don't Click!!](https://youareanidiot.cc/)
