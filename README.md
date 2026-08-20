@@ -3,7 +3,7 @@ Hi! To save you some time, here's a quick overview of my GitHub projects.
 Most people know me through [PocketMine-MP](https://github.com/pmmp/PocketMine-MP). If you're looking for my PocketMine-MP projects, you can find them here:
 
 * **Plugins:** [NhanAZ-Plugins](https://github.com/orgs/NhanAZ-Plugins/repositories)
-* **Libraries / Virions:** [NhanAZ-Libraries](https://github.com/NhanAZ-Libraries/repositories)
+* **Libraries:** [NhanAZ-Libraries](https://github.com/orgs/NhanAZ-Libraries/repositories)
 
 I also build useful web tools and other web projects, which you can find at [NhanAZ-Web](https://github.com/NhanAZ-Web/repositories).
 
