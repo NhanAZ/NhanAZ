@@ -14,7 +14,7 @@ import urllib.request
 
 GITHUB_USER = "NhanAZ"
 README_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "README.md")
-COLUMNS = 5
+COLUMNS = 6
 AVATAR_SIZE = 100
 
 MARKERS_START = "<!-- FOLLOWERS-START -->"
