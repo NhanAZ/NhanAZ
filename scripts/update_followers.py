@@ -14,7 +14,7 @@ import urllib.request
 
 GITHUB_USER = "NhanAZ"
 README_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "README.md")
-COLUMNS = 8
+COLUMNS = 7
 AVATAR_SIZE = 64
 
 MARKERS_START = "<!-- FOLLOWERS-START -->"
@@ -49,8 +49,8 @@ def fetch_all_followers(username: str, token: str | None = None) -> list[dict]:
 
 def generate_followers_table(followers: list[dict]) -> str:
     """Generate an HTML table of followers with avatars."""
-    # Sort alphabetically (case-insensitive) for deterministic output
-    followers.sort(key=lambda f: f["login"].lower())
+    # GitHub API returns followers in chronological order (oldest first)
+    # No sorting needed — the API order is exactly what we want
 
     lines = []
     lines.append(MARKERS_START)
