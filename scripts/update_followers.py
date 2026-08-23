@@ -73,8 +73,9 @@ def generate_followers_table(followers: list[dict], following_logins: set[str]) 
     mutual = [f for f in followers if f["login"] in following_logins]
     others = [f for f in followers if f["login"] not in following_logins]
 
-    # Sort each group alphabetically (case-insensitive)
-    mutual.sort(key=lambda f: f["login"].lower())
+    # Sort mutual follows by account age (lower ID = older account)
+    mutual.sort(key=lambda f: f["id"])
+    # Sort the rest alphabetically (case-insensitive)
     others.sort(key=lambda f: f["login"].lower())
 
     # Mutual follows first, then the rest
