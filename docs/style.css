@@ -429,11 +429,12 @@ h2 {
 }
 
 .closing-note h2 {
+  max-width: none;
   margin-bottom: 1.4rem;
 }
 
 .closing-note > p:not(.eyebrow) {
-  max-width: 450px;
+  max-width: none;
   color: var(--muted);
 }
 
