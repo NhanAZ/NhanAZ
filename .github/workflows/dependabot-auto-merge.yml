@@ -16,8 +16,8 @@ jobs:
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'NhanAZ/NhanAZ'
     runs-on: ubuntu-latest
     steps:
-      - name: Enable auto-merge for Dependabot PR
+      - name: Merge Dependabot PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: gh pr merge --auto --squash --delete-branch "$PR_URL"
+        run: gh pr merge --squash --delete-branch "$PR_URL"
