@@ -3,7 +3,8 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
   const revealItems = [...document.querySelectorAll("[data-reveal]")]
   const counter = document.querySelector(".stat-number")
-  const peopleGrid = document.querySelector(".people-grid")
+  const currentGrid = document.querySelector(".current-people-grid") || document.querySelector(".people-grid")
+  const formerGrid = document.querySelector(".former-people-grid")
   const randomUnit = () => {
     if (window.crypto?.getRandomValues) {
       return window.crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
@@ -23,34 +24,40 @@
 
     return shuffled
   }
-  const cards = [...document.querySelectorAll(".person-card")]
-  const mutualCards = cards.filter(card => card.dataset.mutual === "true")
-  const otherCards = cards.filter(card => card.dataset.mutual !== "true")
-  const followerCards = [...shuffle(mutualCards), ...shuffle(otherCards)]
+  const currentCards = currentGrid ? [...currentGrid.querySelectorAll(".person-card")] : []
+  const formerCards = formerGrid ? [...formerGrid.querySelectorAll(".person-card")] : []
+  const mutualCards = currentCards.filter(card => card.dataset.mutual === "true")
+  const otherCards = currentCards.filter(card => card.dataset.mutual !== "true")
+  const orderedCurrentCards = [...shuffle(mutualCards), ...shuffle(otherCards)]
+  const orderedFormerCards = shuffle(formerCards)
 
   root.classList.add("js")
 
-  followerCards.forEach((card, index) => {
-    if (peopleGrid) peopleGrid.appendChild(card)
+  const prepareCard = (card, grid, index) => {
+    if (grid) grid.appendChild(card)
     card.style.setProperty("--index", String(index))
 
     if (card.dataset.mutual === "true") {
       card.classList.add("is-mutual")
       card.title = "Follows you back"
     }
+    if (card.dataset.former === "true") card.classList.add("is-former")
 
     const profileUrl = card.getAttribute("href") || card.dataset.profileUrl
-    if (!profileUrl || card.tagName !== "A") return
+    if (!profileUrl || card.tagName !== "A") return card
 
     const panel = document.createElement("div")
     panel.className = card.className
     panel.style.cssText = card.style.cssText
     panel.title = card.title
+    panel.dataset.profileUrl = profileUrl
+    if (card.dataset.mutual === "true") panel.dataset.mutual = "true"
+    if (card.dataset.former === "true") panel.dataset.former = "true"
     panel.innerHTML = card.innerHTML
     card.replaceWith(panel)
 
-    const username = panel.querySelector(".person-meta span")
-    if (!username) return
+    const username = panel.querySelector(".person-meta > span:not(.person-record)")
+    if (!username) return panel
 
     const usernameLink = document.createElement("a")
     usernameLink.className = "person-username"
@@ -59,7 +66,11 @@
     usernameLink.rel = "noreferrer"
     usernameLink.textContent = username.textContent
     username.replaceWith(usernameLink)
-  })
+    return panel
+  }
+
+  orderedCurrentCards.forEach((card, index) => prepareCard(card, currentGrid, index))
+  orderedFormerCards.forEach((card, index) => prepareCard(card, formerGrid, index))
 
   const show = element => element.classList.add("is-visible")
 

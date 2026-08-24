@@ -357,6 +357,10 @@ h1 {
   padding: 6rem 0 5.5rem;
 }
 
+.former-people-section {
+  padding-top: 0;
+}
+
 .section-heading {
   display: block;
   max-width: 720px;
@@ -483,6 +487,21 @@ h2 {
 .person-username {
   color: var(--faint);
   font-size: 0.74rem;
+}
+
+.person-record {
+  color: var(--faint);
+  font-size: 0.61rem !important;
+  letter-spacing: 0.01em;
+  opacity: 0.82;
+}
+
+.person-card.is-former {
+  background: rgba(255, 250, 243, 0.48);
+}
+
+.person-card.is-former:hover {
+  background: rgba(255, 250, 243, 0.78);
 }
 
 .person-username {

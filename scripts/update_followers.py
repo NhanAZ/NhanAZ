@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Update the README note and the follower section on the thank-you page."""
+"""Update follower records and render the current and former follower sections."""
 
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
 from html import escape
 import json
 import os
@@ -15,6 +16,7 @@ GITHUB_USER = "NhanAZ"
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 README_PATH = os.path.join(ROOT_DIR, "README.md")
 PAGE_PATH = os.path.join(ROOT_DIR, "docs", "index.html")
+HISTORY_PATH = os.path.join(ROOT_DIR, "data", "followers-history.json")
 MARKERS_START = "<!-- FOLLOWERS-START -->"
 MARKERS_END = "<!-- FOLLOWERS-END -->"
 PER_PAGE = 100
@@ -85,10 +87,19 @@ def fetch_following_logins(username: str, token: str | None = None) -> set[str]:
     return following
 
 
+def numeric_github_id(value: object) -> int:
+    """Return a stable numeric GitHub ID when the API provides one."""
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def fallback_profile(follower: dict, following_logins: set[str]) -> dict:
-    """Keep the useful fields available from the followers endpoint."""
+    """Keep useful fields available from the followers endpoint."""
     login = str(follower.get("login", ""))
     return {
+        "github_id": numeric_github_id(follower.get("id")),
         "login": login,
         "name": login,
         "avatar_url": str(follower.get("avatar_url", "")),
@@ -114,6 +125,7 @@ def fetch_profile(follower: dict, token: str | None, following_logins: set[str])
     if not isinstance(data, dict):
         return profile
 
+    profile["github_id"] = numeric_github_id(data.get("id") or profile["github_id"])
     profile["name"] = str(data.get("name") or profile["login"])
     profile["avatar_url"] = str(data.get("avatar_url") or profile["avatar_url"])
     profile["html_url"] = str(data.get("html_url") or profile["html_url"])
@@ -136,48 +148,199 @@ def enrich_followers(
         )
 
 
-def generate_people_section(followers: list[dict]) -> str:
-    """Render a calm, responsive grid of follower names, usernames, and avatars."""
-    mutual_people = [person for person in followers if person.get("is_mutual", False)]
-    other_people = [person for person in followers if not person.get("is_mutual", False)]
-    people = mutual_people + other_people
-    cards = []
+def person_key(person: dict) -> str:
+    """Identify a person by GitHub ID, with login as a safe fallback."""
+    github_id = numeric_github_id(person.get("github_id"))
+    if github_id:
+        return f"id:{github_id}"
+    return f"login:{str(person.get('login', '')).casefold()}"
 
-    for index, person in enumerate(people):
-        name = escape(person["name"] or person["login"])
-        login = escape(person["login"])
-        avatar_url = escape(person["avatar_url"], quote=True)
-        profile_url = escape(person["html_url"], quote=True)
-        is_mutual = person.get("is_mutual", False)
-        card_class = "person-card is-mutual" if is_mutual else "person-card"
-        mutual_attributes = ' data-mutual="true" title="Follows you back"' if is_mutual else ""
-        cards.append(
-            "  <div class=\"{card_class}\"{mutual_attributes} "
-            "data-profile-url=\"{profile_url}\" style=\"--index: {index}\">\n"
-            "    <img src=\"{avatar_url}\" alt=\"{name} (@{login})\" "
-            "width=\"56\" height=\"56\" loading=\"lazy\" />\n"
-            "    <span class=\"person-meta\">\n"
-            "      <strong>{name}</strong>\n"
-            "      <a class=\"person-username\" href=\"{profile_url}\" "
-            "target=\"_blank\" rel=\"noreferrer\">@{login}</a>\n"
-            "    </span>\n"
-            "  </div>".format(
-                card_class=card_class,
-                mutual_attributes=mutual_attributes,
-                profile_url=profile_url,
-                index=index,
-                avatar_url=avatar_url,
-                name=name,
-                login=login,
+
+def load_history() -> dict:
+    """Load the append-only follower history, or start a new archive."""
+    if not os.path.exists(HISTORY_PATH):
+        return {
+            "schema_version": 1,
+            "updated_at": None,
+            "snapshots": [],
+            "people": [],
+        }
+
+    with open(HISTORY_PATH, "r", encoding="utf-8") as file:
+        history = json.load(file)
+
+    if not isinstance(history, dict):
+        raise RuntimeError("Follower history must be a JSON object")
+
+    history.setdefault("schema_version", 1)
+    history.setdefault("updated_at", None)
+    history.setdefault("snapshots", [])
+    history.setdefault("people", [])
+    return history
+
+
+def save_history(history: dict) -> bool:
+    """Persist the follower archive without removing historical people."""
+    os.makedirs(os.path.dirname(HISTORY_PATH), exist_ok=True)
+    new_content = json.dumps(history, ensure_ascii=False, indent=2) + "\n"
+    old_content = ""
+
+    if os.path.exists(HISTORY_PATH):
+        with open(HISTORY_PATH, "r", encoding="utf-8") as file:
+            old_content = file.read()
+
+    if new_content == old_content:
+        return False
+
+    with open(HISTORY_PATH, "w", encoding="utf-8") as file:
+        file.write(new_content)
+    return True
+
+
+def update_history(history: dict, current_followers: list[dict], snapshot_date: str) -> list[dict]:
+    """Merge today's snapshot while keeping people who are no longer following."""
+    people = history.get("people", [])
+    people_by_key = {person_key(person): person for person in people}
+    is_initial_snapshot = not people_by_key
+    current_by_key = {person_key(person): person for person in current_followers}
+
+    for follower in current_followers:
+        key = person_key(follower)
+        person = people_by_key.get(key)
+        if person is None:
+            person = {
+                "github_id": numeric_github_id(follower.get("github_id")),
+                "login": follower["login"],
+                "name": follower["name"],
+                "avatar_url": follower["avatar_url"],
+                "html_url": follower["html_url"],
+                "first_seen_at": None if is_initial_snapshot else snapshot_date,
+                "last_seen_at": snapshot_date,
+            }
+            people.append(person)
+            people_by_key[key] = person
+        else:
+            person.update(
+                {
+                    "github_id": numeric_github_id(follower.get("github_id")),
+                    "login": follower["login"],
+                    "name": follower["name"],
+                    "avatar_url": follower["avatar_url"],
+                    "html_url": follower["html_url"],
+                    "last_seen_at": snapshot_date,
+                }
             )
+
+    snapshot = {
+        "date": snapshot_date,
+        "github_ids": sorted(
+            numeric_github_id(follower.get("github_id"))
+            for follower in current_followers
+            if numeric_github_id(follower.get("github_id"))
+        ),
+    }
+    history["snapshots"] = [
+        item for item in history.get("snapshots", []) if item.get("date") != snapshot_date
+    ]
+    history["snapshots"].append(snapshot)
+    history["updated_at"] = snapshot_date
+    history["people"] = people
+
+    rendered_people = []
+    for person in people:
+        current = current_by_key.get(person_key(person))
+        rendered_person = dict(person)
+        rendered_person["is_current"] = current is not None
+        rendered_person["is_mutual"] = bool(current and current.get("is_mutual", False))
+        rendered_people.append(rendered_person)
+
+    return rendered_people
+
+
+def render_person_card(person: dict, index: int, is_former: bool = False) -> str:
+    """Render one person card with stable ID and first-recorded date."""
+    name = escape(person["name"] or person["login"])
+    login = escape(person["login"])
+    avatar_url = escape(person["avatar_url"], quote=True)
+    profile_url = escape(person["html_url"], quote=True)
+    github_id = escape(str(numeric_github_id(person.get("github_id")) or "-"))
+    first_seen_at = escape(str(person.get("first_seen_at") or "-"))
+    is_mutual = person.get("is_mutual", False) and not is_former
+    classes = ["person-card"]
+    attributes = []
+
+    if is_mutual:
+        classes.append("is-mutual")
+        attributes.extend(['data-mutual="true"', 'title="Follows you back"'])
+    if is_former:
+        classes.append("is-former")
+        attributes.extend(['data-former="true"', 'title="Once followed this journey"'])
+
+    attribute_text = " " + " ".join(attributes) if attributes else ""
+    return (
+        "  <div class=\"{classes}\"{attributes} data-profile-url=\"{profile_url}\" style=\"--index: {index}\">\n"
+        "    <img src=\"{avatar_url}\" alt=\"{name} (@{login})\" "
+        "width=\"56\" height=\"56\" loading=\"lazy\" />\n"
+        "    <span class=\"person-meta\">\n"
+        "      <strong>{name}</strong>\n"
+        "      <a class=\"person-username\" href=\"{profile_url}\" "
+        "target=\"_blank\" rel=\"noreferrer\">@{login}</a>\n"
+        "      <span class=\"person-record\">ID {github_id} - First recorded {first_seen_at}</span>\n"
+        "    </span>\n"
+        "  </div>".format(
+            classes=" ".join(classes),
+            attributes=attribute_text,
+            profile_url=profile_url,
+            index=index,
+            avatar_url=avatar_url,
+            name=name,
+            login=login,
+            github_id=github_id,
+            first_seen_at=first_seen_at,
+        )
+    )
+
+
+def generate_people_section(people: list[dict]) -> str:
+    """Render current and former followers without discarding history."""
+    current_people = [person for person in people if person.get("is_current", False)]
+    former_people = [person for person in people if not person.get("is_current", False)]
+    mutual_people = [person for person in current_people if person.get("is_mutual", False)]
+    other_people = [person for person in current_people if not person.get("is_mutual", False)]
+    current_cards = "\n".join(
+        render_person_card(person, index)
+        for index, person in enumerate(mutual_people + other_people)
+    )
+    former_cards = "\n".join(
+        render_person_card(person, index, is_former=True)
+        for index, person in enumerate(former_people)
+    )
+    former_section = ""
+
+    if former_people:
+        former_section = (
+            "\n\n"
+            "<section class=\"people-section former-people-section\" aria-labelledby=\"former-people-title\">\n"
+            "  <div class=\"section-heading\" data-reveal>\n"
+            "    <p class=\"eyebrow\">Those who were here</p>\n"
+            "    <h2 id=\"former-people-title\">Some paths meet briefly, yet still leave a mark.</h2>\n"
+            "    <p>These are the people who once followed this journey. Even when a path changes direction, I remain sincerely grateful for the time it shared with mine.</p>\n"
+            "  </div>\n"
+            "  <p class=\"people-count\" data-reveal><strong>"
+            + str(len(former_people))
+            + "</strong> people were once part of this journey.</p>\n"
+            "  <div class=\"people-grid former-people-grid\">\n"
+            f"{former_cards}\n"
+            "  </div>\n"
+            "</section>"
         )
 
-    cards_markup = "\n".join(cards)
+    current_count = len(current_people)
     return (
         f"{MARKERS_START}\n"
         "<section class=\"quiet-stat\" aria-label=\"Follower count\" data-reveal>\n"
         "  <span class=\"stat-label\">At this point</span>\n"
-        "  <span class=\"stat-number\">" + str(len(people)) + "</span>\n"
+        "  <span class=\"stat-number\">" + str(current_count) + "</span>\n"
         "  <span class=\"stat-description\">people have chosen to follow this journey, and each one gives me reason to continue.</span>\n"
         "</section>\n\n"
         "<section class=\"people-section\" aria-labelledby=\"people-title\">\n"
@@ -186,11 +349,12 @@ def generate_people_section(followers: list[dict]) -> str:
         "    <h2 id=\"people-title\">Every name here marks a moment when this journey reached another person.</h2>\n"
         "    <p>Some of you have been here for a while. Some have only just arrived. To every one of you, thank you for making room for this journey in your day.</p>\n"
         "  </div>\n"
-        "  <p class=\"people-count\" data-reveal><strong>" + str(len(people)) + "</strong> people have given this journey a place in their day.</p>\n"
-        "  <div class=\"people-grid\">\n"
-        f"{cards_markup}\n"
+        "  <p class=\"people-count\" data-reveal><strong>" + str(current_count) + "</strong> people have given this journey a place in their day.</p>\n"
+        "  <div class=\"people-grid current-people-grid\">\n"
+        f"{current_cards}\n"
         "  </div>\n"
-        "</section>\n"
+        "</section>"
+        f"{former_section}\n"
         f"{MARKERS_END}"
     )
 
@@ -218,12 +382,16 @@ def update_file(path: str, replacement: str) -> bool:
 
 def main() -> None:
     token = os.environ.get("GITHUB_TOKEN")
+    snapshot_date = datetime.now(timezone.utc).date().isoformat()
     raw_followers = fetch_all_followers(GITHUB_USER, token)
     try:
         following_logins = fetch_following_logins(GITHUB_USER, token)
     except RuntimeError:
         following_logins = set()
     followers = enrich_followers(raw_followers, token, following_logins)
+    history = load_history()
+    people = update_history(history, followers, snapshot_date)
+    changed_history = save_history(history)
     count = len(followers)
 
     readme_block = (
@@ -232,10 +400,10 @@ def main() -> None:
         f"{MARKERS_END}"
     )
     changed_readme = update_file(README_PATH, readme_block)
-    changed_page = update_file(PAGE_PATH, generate_people_section(followers))
+    changed_page = update_file(PAGE_PATH, generate_people_section(people))
 
-    if changed_readme or changed_page:
-        print(f"Updated README.md and the thank-you page with {count} followers.")
+    if changed_readme or changed_page or changed_history:
+        print(f"Updated the follower archive and thank-you page with {count} current followers.")
     else:
         print("Follower data is already up to date.")
 
