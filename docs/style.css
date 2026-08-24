@@ -541,8 +541,25 @@ h2 {
     padding-bottom: 5rem;
   }
 
+  .hero::after {
+    top: -2rem;
+    right: 1rem;
+    width: 11rem;
+    height: 11rem;
+    opacity: 0.52;
+  }
+
   .hero-aside {
     max-width: 560px;
+  }
+
+  .quiet-stat {
+    grid-template-columns: auto auto;
+  }
+
+  .stat-description {
+    grid-column: 1 / -1;
+    white-space: normal;
   }
 
   .people-grid {
@@ -561,6 +578,14 @@ h2 {
     margin-top: 1rem;
     padding: 4rem 1.25rem 4rem;
     border-radius: 1.5rem;
+  }
+
+  .hero::after {
+    top: -1.5rem;
+    right: 0.5rem;
+    width: 9rem;
+    height: 9rem;
+    opacity: 0.42;
   }
 
   .hero-heart {
@@ -635,5 +660,15 @@ h2 {
   .site-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 420px) {
+  .people-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .person-card {
+    padding: 0.6rem;
   }
 }
