@@ -122,7 +122,7 @@ a:focus-visible {
   grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
   gap: clamp(2.5rem, 8vw, 8rem);
   align-items: end;
-  min-height: 560px;
+  min-height: 500px;
   margin-top: 0;
   padding: clamp(3.5rem, 8vw, 7rem) clamp(1.5rem, 6vw, 5.5rem) clamp(3.5rem, 8vw, 6rem);
   overflow: hidden;
@@ -227,11 +227,11 @@ h2 {
 }
 
 h1 {
-  max-width: 680px;
+  max-width: 620px;
   margin-bottom: 0;
-  font-size: clamp(3.5rem, 7vw, 6.5rem);
-  letter-spacing: -0.075em;
-  line-height: 0.92;
+  font-size: clamp(2.6rem, 4.2vw, 4.4rem);
+  letter-spacing: -0.055em;
+  line-height: 0.98;
 }
 
 .hero-aside {
@@ -271,7 +271,7 @@ h1 {
 .stat-number {
   color: var(--accent);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.8rem, 5vw, 4.4rem);
+  font-size: clamp(2.2rem, 3.5vw, 3.5rem);
   font-weight: 500;
   letter-spacing: -0.08em;
   line-height: 0.9;
@@ -301,11 +301,11 @@ h1 {
 }
 
 h2 {
-  max-width: 600px;
+  max-width: 560px;
   margin-bottom: 0;
-  font-size: clamp(2rem, 3.5vw, 3.6rem);
-  letter-spacing: -0.055em;
-  line-height: 1;
+  font-size: clamp(1.8rem, 2.8vw, 3rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
 }
 
 .section-heading > p:last-child {
@@ -579,7 +579,7 @@ h2 {
   }
 
   h1 {
-    font-size: clamp(3rem, 14vw, 5rem);
+    font-size: clamp(2.4rem, 11vw, 3.6rem);
   }
 
   .quiet-stat {
