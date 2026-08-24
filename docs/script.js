@@ -4,14 +4,29 @@
   const revealItems = [...document.querySelectorAll("[data-reveal]")]
   const counter = document.querySelector(".stat-number")
   const peopleGrid = document.querySelector(".people-grid")
-  const followerCards = [...document.querySelectorAll(".person-card")].sort((left, right) => {
-    const mutualDifference = Number(right.dataset.mutual === "true") - Number(left.dataset.mutual === "true")
-    if (mutualDifference) return mutualDifference
+  const randomUnit = () => {
+    if (window.crypto?.getRandomValues) {
+      return window.crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
+    }
 
-    const leftName = left.querySelector(".person-meta strong")?.textContent.trim() || ""
-    const rightName = right.querySelector(".person-meta strong")?.textContent.trim() || ""
-    return leftName.localeCompare(rightName)
-  })
+    return Math.random()
+  }
+  const shuffle = cards => {
+    const shuffled = [...cards]
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(randomUnit() * (index + 1))
+      const current = shuffled[index]
+      shuffled[index] = shuffled[swapIndex]
+      shuffled[swapIndex] = current
+    }
+
+    return shuffled
+  }
+  const cards = [...document.querySelectorAll(".person-card")]
+  const mutualCards = cards.filter(card => card.dataset.mutual === "true")
+  const otherCards = cards.filter(card => card.dataset.mutual !== "true")
+  const followerCards = [...shuffle(mutualCards), ...shuffle(otherCards)]
 
   root.classList.add("js")
 
@@ -91,7 +106,7 @@
   if (reduceMotion.matches || !window.matchMedia("(pointer: fine)").matches) return
 
   const hero = document.querySelector(".hero")
-  const cards = document.querySelectorAll(".person-card")
+  const tiltCards = document.querySelectorAll(".person-card")
   let pointerFrame = 0
   let latestPointer
 
@@ -121,7 +136,7 @@
 
   window.addEventListener("blur", () => root.classList.remove("has-pointer"))
 
-  cards.forEach(card => {
+  tiltCards.forEach(card => {
     card.addEventListener("pointermove", event => {
       const bounds = card.getBoundingClientRect()
       const x = (event.clientX - bounds.left) / bounds.width - 0.5

@@ -138,14 +138,9 @@ def enrich_followers(
 
 def generate_people_section(followers: list[dict]) -> str:
     """Render a calm, responsive grid of follower names, usernames, and avatars."""
-    people = sorted(
-        followers,
-        key=lambda person: (
-            not person.get("is_mutual", False),
-            person["name"].casefold(),
-            person["login"].casefold(),
-        ),
-    )
+    mutual_people = [person for person in followers if person.get("is_mutual", False)]
+    other_people = [person for person in followers if not person.get("is_mutual", False)]
+    people = mutual_people + other_people
     cards = []
 
     for index, person in enumerate(people):
