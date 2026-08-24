@@ -1,19 +1,22 @@
-name: Update Followers in README
+name: Update follower count
 
 on:
   schedule:
-    # Runs daily at midnight UTC (~7AM Vietnam time)
     - cron: "0 0 * * *"
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
+
+concurrency:
+  group: update-follower-count
+  cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
-  update-followers:
+  update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -21,21 +24,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Fetch followers and update README
+      - name: Update README and thank-you page
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/update_followers.py
 
-      - name: Check for changes
-        id: changes
+      - name: Commit changes
         run: |
-          git diff --quiet README.md || echo "changed=true" >> $GITHUB_OUTPUT
+          if git diff --quiet -- README.md docs/index.html; then
+            exit 0
+          fi
 
-      - name: Commit and push
-        if: steps.changes.outputs.changed == 'true'
-        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git commit -m "docs: update followers section [skip ci]"
-          git push
+          git add README.md docs/index.html
+          git commit -m "docs: update follower count [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
