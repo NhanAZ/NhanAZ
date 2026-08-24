@@ -103,7 +103,7 @@ def enrich_followers(followers: list[dict], token: str | None) -> list[dict]:
 
 
 def generate_people_section(followers: list[dict]) -> str:
-    """Render a calm, single-column list of follower names, usernames, and avatars."""
+    """Render a calm, responsive grid of follower names, usernames, and avatars."""
     people = sorted(
         followers,
         key=lambda person: (person["name"].casefold(), person["login"].casefold()),
