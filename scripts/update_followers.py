@@ -141,7 +141,7 @@ def generate_people_section(followers: list[dict]) -> str:
         "  <span class=\"stat-number\">" + str(len(people)) + "</span>\n"
         "  <span class=\"stat-description\">people have chosen to keep an eye on the work, and I am quietly grateful that these small things found a place in their day.</span>\n"
         "</section>\n\n"
-        "<section class=\"people-section\" aria-labelledby=\"people-title\" data-reveal>\n"
+        "<section class=\"people-section\" aria-labelledby=\"people-title\">\n"
         "  <div class=\"section-heading\" data-reveal>\n"
         "    <p class=\"eyebrow\">The people</p>\n"
         "    <h2 id=\"people-title\">Every name here means the work found a little more room in the world.</h2>\n"
