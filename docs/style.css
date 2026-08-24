@@ -14,7 +14,6 @@
   --shadow: 0 20px 60px rgba(126, 73, 68, 0.09);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1.2);
-  --scroll-progress: 0%;
 }
 
 * {
@@ -45,19 +44,6 @@ body {
 
 a {
   color: inherit;
-}
-
-.scroll-progress {
-  position: fixed;
-  z-index: 30;
-  top: 0;
-  left: 0;
-  width: var(--scroll-progress);
-  height: 3px;
-  pointer-events: none;
-  background: linear-gradient(90deg, var(--warm), var(--accent));
-  box-shadow: 0 0 18px rgba(166, 83, 91, 0.35);
-  transform-origin: left center;
 }
 
 .cursor-glow {
@@ -95,10 +81,9 @@ a {
   z-index: 1;
   width: min(100% - 3rem, 1120px);
   margin: 0 auto;
-  padding: 1.5rem 0 2rem;
+  padding: 1rem 0 2rem;
 }
 
-.site-header,
 .site-footer {
   display: flex;
   align-items: center;
@@ -108,30 +93,12 @@ a {
   font-size: 0.77rem;
 }
 
-.site-header {
-  padding-bottom: 1.15rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.wordmark {
-  color: var(--text);
-  font-weight: 760;
-  letter-spacing: -0.04em;
-  text-decoration: none;
-}
-
-.header-context {
-  margin-left: auto;
-}
-
-.header-link,
 .site-footer a,
 .text-link {
   text-decoration-color: rgba(166, 83, 91, 0.45);
   text-underline-offset: 0.24em;
 }
 
-.header-link:hover,
 .site-footer a:hover,
 .text-link:hover {
   color: var(--accent);
@@ -176,7 +143,7 @@ a:focus-visible {
   gap: clamp(2.5rem, 8vw, 8rem);
   align-items: end;
   min-height: 620px;
-  margin-top: 2rem;
+  margin-top: 0;
   padding: clamp(3.5rem, 8vw, 7rem) clamp(1.5rem, 6vw, 5.5rem) clamp(3.5rem, 8vw, 6rem);
   overflow: hidden;
   border: 1px solid rgba(80, 61, 47, 0.1);
@@ -192,20 +159,9 @@ a:focus-visible {
   box-shadow: 0 24px 75px rgba(126, 73, 68, 0.13);
 }
 
-.hero::before {
-  position: absolute;
-  top: 18%;
-  left: -30%;
-  width: 45%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(166, 83, 91, 0.38), transparent);
-  content: "";
-  animation: hero-sweep 8s var(--ease-out) infinite;
-}
-
 .hero::after {
   position: absolute;
-  top: 2.25rem;
+  top: 0.5rem;
   right: 3rem;
   width: 14rem;
   height: 14rem;
@@ -225,11 +181,11 @@ a:focus-visible {
 
 .hero-heart {
   position: absolute;
-  right: 5%;
-  bottom: 4%;
+  right: 0.75rem;
+  bottom: 0.85rem;
   z-index: 0;
-  width: 6.25rem;
-  height: 6.25rem;
+  width: 4.75rem;
+  height: 4.75rem;
   background: linear-gradient(145deg, var(--accent), var(--warm));
   filter: drop-shadow(0 12px 24px rgba(166, 83, 91, 0.2));
   opacity: 0.82;
@@ -311,17 +267,17 @@ h1 {
 .aside-signoff {
   margin-top: 1.75rem;
   padding-left: 1.15rem;
-  border-left: 2px solid var(--warm);
+  border-left: 3px solid var(--warm);
   color: var(--text);
 }
 
 .quiet-stat {
   display: grid;
-  grid-template-columns: auto auto 1fr;
+  grid-template-columns: auto auto minmax(0, 1fr);
   gap: 1rem 1.5rem;
   align-items: baseline;
   margin-top: 2rem;
-  padding: 1.35rem 1.6rem;
+  padding: 1rem 1.6rem;
   border: 1px solid var(--line);
   border-radius: 1.4rem;
   background: rgba(255, 250, 243, 0.65);
@@ -342,9 +298,10 @@ h1 {
 }
 
 .stat-description {
-  max-width: 310px;
+  max-width: none;
   color: var(--muted);
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .people-section {
@@ -517,22 +474,6 @@ h2 {
   }
 }
 
-@keyframes hero-sweep {
-  0%, 18% {
-    transform: translateX(0) scaleX(0.5);
-    opacity: 0;
-  }
-
-  28% {
-    opacity: 1;
-  }
-
-  70%, 100% {
-    transform: translateX(310%) scaleX(1);
-    opacity: 0;
-  }
-}
-
 @keyframes heart-breathe {
   0%, 100% {
     opacity: 0.7;
@@ -567,24 +508,6 @@ h2 {
   }
 }
 
-@keyframes progress-grow {
-  from {
-    transform: scaleX(0);
-  }
-
-  to {
-    transform: scaleX(1);
-  }
-}
-
-@supports (animation-timeline: scroll()) {
-  .scroll-progress {
-    width: 100%;
-    animation: progress-grow linear both;
-    animation-timeline: scroll(root block);
-  }
-}
-
 @supports (animation-timeline: view()) {
   .people-grid .person-card {
     animation-name: card-in;
@@ -599,9 +522,7 @@ h2 {
     scroll-behavior: auto;
   }
 
-  .scroll-progress,
   .cursor-glow,
-  .hero::before,
   .hero::after,
   .hero-heart,
   .scroll-cue-line {
@@ -648,10 +569,6 @@ h2 {
     padding-top: 1rem;
   }
 
-  .header-context {
-    display: none;
-  }
-
   .hero {
     gap: 2.5rem;
     margin-top: 1rem;
@@ -660,10 +577,10 @@ h2 {
   }
 
   .hero-heart {
-    right: 1rem;
-    bottom: 7rem;
-    width: 5.75rem;
-    height: 5.75rem;
+    right: 0.75rem;
+    bottom: 1rem;
+    width: 4.5rem;
+    height: 4.5rem;
     opacity: 0.55;
   }
 
@@ -684,6 +601,7 @@ h2 {
 
   .stat-description {
     grid-column: 1 / -1;
+    white-space: normal;
   }
 
   .section-heading {

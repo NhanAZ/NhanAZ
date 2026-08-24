@@ -48,23 +48,6 @@
     revealItems.forEach(item => revealObserver.observe(item))
   }
 
-  let scrollFrame = 0
-  const updateScrollProgress = () => {
-    const scrollable = document.documentElement.scrollHeight - window.innerHeight
-    const progress = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0
-    root.style.setProperty("--scroll-progress", `${progress}%`)
-    scrollFrame = 0
-  }
-
-  const requestScrollProgress = () => {
-    if (scrollFrame) return
-    scrollFrame = requestAnimationFrame(updateScrollProgress)
-  }
-
-  updateScrollProgress()
-  window.addEventListener("scroll", requestScrollProgress, { passive: true })
-  window.addEventListener("resize", requestScrollProgress, { passive: true })
-
   if (reduceMotion.matches || !window.matchMedia("(pointer: fine)").matches) return
 
   const hero = document.querySelector(".hero")
