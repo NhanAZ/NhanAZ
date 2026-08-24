@@ -189,7 +189,7 @@ def generate_people_section(followers: list[dict]) -> str:
         "  <div class=\"section-heading\" data-reveal>\n"
         "    <p class=\"eyebrow\">The people</p>\n"
         "    <h2 id=\"people-title\">Each name here is a quiet sign that the work reached someone.</h2>\n"
-        "    <p>The people I follow back appear first, followed by everyone who chose to keep an eye on the work.</p>\n"
+        "    <p>These are the people who chose to keep an eye on the work, and I am grateful for each name here.</p>\n"
         "  </div>\n"
         "  <p class=\"people-count\" data-reveal><strong>" + str(len(people)) + "</strong> people have given this work a place in their day.</p>\n"
         "  <div class=\"people-grid\">\n"
