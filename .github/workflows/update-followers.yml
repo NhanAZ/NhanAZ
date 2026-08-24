@@ -31,7 +31,8 @@ jobs:
 
       - name: Commit changes
         run: |
-          if git diff --quiet -- README.md docs/index.html; then
+          if git diff --quiet -- README.md docs/index.html
+          then
             exit 0
           fi
 

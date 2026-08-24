@@ -117,7 +117,7 @@ def generate_people_section(followers: list[dict]) -> str:
         profile_url = escape(person["html_url"], quote=True)
         cards.append(
             "  <a class=\"person-card\" href=\"{profile_url}\" "
-            "target=\"_blank\" rel=\"noreferrer\" style=\"--index: {index};\">\n"
+            "target=\"_blank\" rel=\"noreferrer\" style=\"--index: {index}\">\n"
             "    <img src=\"{avatar_url}\" alt=\"{name} (@{login})\" "
             "width=\"56\" height=\"56\" loading=\"lazy\" />\n"
             "    <span class=\"person-meta\">\n"
@@ -145,8 +145,8 @@ def generate_people_section(followers: list[dict]) -> str:
         "<section class=\"people-section\" aria-labelledby=\"people-title\">\n"
         "  <div class=\"section-heading\">\n"
         "    <p class=\"eyebrow\">The people</p>\n"
-        "    <h2 id=\"people-title\">Every name here means this work travelled a little further.</h2>\n"
-        "    <p>There is no ranking and no ceremony. Just a record of the people who chose to keep an eye on what I make.</p>\n"
+        "    <h2 id=\"people-title\">Every name here means the work found a little more room in the world.</h2>\n"
+        "    <p>There is no ranking and no ceremony. Just the names of people who chose to keep an eye on what I make.</p>\n"
         "  </div>\n"
         "  <p class=\"people-count\"><strong>" + str(len(people)) + "</strong> people, each with a place of their own.</p>\n"
         "  <div class=\"people-grid\">\n"
