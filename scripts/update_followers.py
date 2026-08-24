@@ -185,7 +185,7 @@ def main() -> None:
 
     readme_block = (
         f"{MARKERS_START}\n"
-        f"**{count} followers.** Thank you. [Read the note →](https://nhanaz.github.io/NhanAZ/)\n"
+        f"**{count} followers.** Thank you for taking the time to follow the work. [A note of thanks →](https://nhanaz.github.io/NhanAZ/)\n"
         f"{MARKERS_END}"
     )
     changed_readme = update_file(README_PATH, readme_block)

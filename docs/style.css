@@ -143,7 +143,7 @@ a:focus-visible {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
   gap: clamp(2.5rem, 8vw, 8rem);
-  align-items: end;
+  align-items: center;
   min-height: 500px;
   margin-top: 0;
   padding: clamp(3.5rem, 8vw, 7rem) clamp(1.5rem, 6vw, 5.5rem) clamp(3.5rem, 8vw, 6rem);
@@ -389,7 +389,7 @@ h2 {
   width: 56px;
   height: 56px;
   border: 2px solid rgba(255, 250, 243, 0.9);
-  border-radius: 50%;
+  border-radius: 0.85rem;
   object-fit: cover;
   box-shadow: 0 3px 12px rgba(112, 79, 49, 0.12);
   transition: transform 400ms var(--ease-spring), box-shadow 300ms ease;
@@ -641,6 +641,7 @@ h2 {
     flex-basis: 42px;
     width: 42px;
     height: 42px;
+    border-radius: 0.7rem;
   }
 
   .person-meta strong {
