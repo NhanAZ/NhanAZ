@@ -122,7 +122,7 @@ a:focus-visible {
   grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
   gap: clamp(2.5rem, 8vw, 8rem);
   align-items: end;
-  min-height: 620px;
+  min-height: 560px;
   margin-top: 0;
   padding: clamp(3.5rem, 8vw, 7rem) clamp(1.5rem, 6vw, 5.5rem) clamp(3.5rem, 8vw, 6rem);
   overflow: hidden;
@@ -227,11 +227,11 @@ h2 {
 }
 
 h1 {
-  max-width: 760px;
+  max-width: 680px;
   margin-bottom: 0;
-  font-size: clamp(4rem, 9vw, 8rem);
-  letter-spacing: -0.09em;
-  line-height: 0.9;
+  font-size: clamp(3.5rem, 7vw, 6.5rem);
+  letter-spacing: -0.075em;
+  line-height: 0.92;
 }
 
 .hero-aside {
@@ -271,7 +271,7 @@ h1 {
 .stat-number {
   color: var(--accent);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(2.8rem, 5vw, 4.4rem);
   font-weight: 500;
   letter-spacing: -0.08em;
   line-height: 0.9;
@@ -285,7 +285,7 @@ h1 {
 }
 
 .people-section {
-  padding: 7rem 0 6.5rem;
+  padding: 6rem 0 5.5rem;
 }
 
 .section-heading {
@@ -301,11 +301,11 @@ h1 {
 }
 
 h2 {
-  max-width: 650px;
+  max-width: 600px;
   margin-bottom: 0;
-  font-size: clamp(2.25rem, 4.2vw, 4.4rem);
-  letter-spacing: -0.07em;
-  line-height: 0.98;
+  font-size: clamp(2rem, 3.5vw, 3.6rem);
+  letter-spacing: -0.055em;
+  line-height: 1;
 }
 
 .section-heading > p:last-child {
@@ -403,7 +403,7 @@ h2 {
 
 .closing-note {
   max-width: none;
-  padding: 4.5rem clamp(1.5rem, 5vw, 4rem) 5rem;
+  padding: 3.75rem clamp(1.5rem, 5vw, 4rem) 4.25rem;
   border: 1px solid var(--line);
   border-radius: 1.75rem;
   background: rgba(255, 250, 243, 0.62);
@@ -579,7 +579,7 @@ h2 {
   }
 
   h1 {
-    font-size: clamp(3.7rem, 18vw, 6rem);
+    font-size: clamp(3rem, 14vw, 5rem);
   }
 
   .quiet-stat {
