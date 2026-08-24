@@ -2,7 +2,7 @@
 """Update follower records and render the current and former follower sections."""
 
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from html import escape
 import json
 import os
@@ -20,6 +20,7 @@ HISTORY_PATH = os.path.join(ROOT_DIR, "data", "followers-history.json")
 MARKERS_START = "<!-- FOLLOWERS-START -->"
 MARKERS_END = "<!-- FOLLOWERS-END -->"
 PER_PAGE = 100
+VIETNAM_TIMEZONE = timezone(timedelta(hours=7))
 
 
 def github_json(url: str, token: str | None = None) -> dict | list:
@@ -382,7 +383,7 @@ def update_file(path: str, replacement: str) -> bool:
 
 def main() -> None:
     token = os.environ.get("GITHUB_TOKEN")
-    snapshot_date = datetime.now(timezone.utc).date().isoformat()
+    snapshot_date = datetime.now(VIETNAM_TIMEZONE).date().isoformat()
     raw_followers = fetch_all_followers(GITHUB_USER, token)
     try:
         following_logins = fetch_following_logins(GITHUB_USER, token)
