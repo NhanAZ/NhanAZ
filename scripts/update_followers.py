@@ -116,15 +116,16 @@ def generate_people_section(followers: list[dict]) -> str:
         avatar_url = escape(person["avatar_url"], quote=True)
         profile_url = escape(person["html_url"], quote=True)
         cards.append(
-            "  <a class=\"person-card\" href=\"{profile_url}\" "
-            "target=\"_blank\" rel=\"noreferrer\" style=\"--index: {index}\">\n"
+            "  <div class=\"person-card\" data-profile-url=\"{profile_url}\" "
+            "style=\"--index: {index}\">\n"
             "    <img src=\"{avatar_url}\" alt=\"{name} (@{login})\" "
             "width=\"56\" height=\"56\" loading=\"lazy\" />\n"
             "    <span class=\"person-meta\">\n"
             "      <strong>{name}</strong>\n"
-            "      <span>@{login}</span>\n"
+            "      <a class=\"person-username\" href=\"{profile_url}\" "
+            "target=\"_blank\" rel=\"noreferrer\">@{login}</a>\n"
             "    </span>\n"
-            "  </a>".format(
+            "  </div>".format(
                 profile_url=profile_url,
                 index=index,
                 avatar_url=avatar_url,
@@ -139,7 +140,7 @@ def generate_people_section(followers: list[dict]) -> str:
         "<section class=\"quiet-stat\" aria-label=\"Follower count\" data-reveal>\n"
         "  <span class=\"stat-label\">At this point</span>\n"
         "  <span class=\"stat-number\">" + str(len(people)) + "</span>\n"
-        "  <span class=\"stat-description\">people have chosen to keep an eye on the work, and I am quietly grateful that these small things found a place in their day.</span>\n"
+        "  <span class=\"stat-description\">people have chosen to keep an eye on the work, and I am quietly grateful.</span>\n"
         "</section>\n\n"
         "<section class=\"people-section\" aria-labelledby=\"people-title\">\n"
         "  <div class=\"section-heading\" data-reveal>\n"

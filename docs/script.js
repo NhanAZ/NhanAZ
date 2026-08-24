@@ -3,8 +3,31 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
   const revealItems = [...document.querySelectorAll("[data-reveal]")]
   const counter = document.querySelector(".stat-number")
+  const followerCards = [...document.querySelectorAll(".person-card")]
 
   root.classList.add("js")
+
+  followerCards.forEach(card => {
+    const profileUrl = card.getAttribute("href") || card.dataset.profileUrl
+    if (!profileUrl || card.tagName !== "A") return
+
+    const panel = document.createElement("div")
+    panel.className = card.className
+    panel.style.cssText = card.style.cssText
+    panel.innerHTML = card.innerHTML
+    card.replaceWith(panel)
+
+    const username = panel.querySelector(".person-meta span")
+    if (!username) return
+
+    const usernameLink = document.createElement("a")
+    usernameLink.className = "person-username"
+    usernameLink.href = profileUrl
+    usernameLink.target = "_blank"
+    usernameLink.rel = "noreferrer"
+    usernameLink.textContent = username.textContent
+    username.replaceWith(usernameLink)
+  })
 
   const show = element => element.classList.add("is-visible")
 
