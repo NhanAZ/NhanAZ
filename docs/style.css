@@ -2,16 +2,16 @@
   color-scheme: light;
   --background: #f5f0e8;
   --surface: #fffaf3;
-  --surface-soft: #fbf3e9;
-  --surface-hover: #f7e7d9;
+  --surface-soft: #fff4f0;
+  --surface-hover: #fae4e1;
   --text: #302b27;
   --muted: #776d64;
   --faint: #9b8e83;
   --line: rgba(80, 61, 47, 0.14);
-  --accent: #b96f4f;
-  --accent-soft: rgba(185, 111, 79, 0.12);
-  --warm: #d7a56d;
-  --shadow: 0 20px 60px rgba(112, 79, 49, 0.09);
+  --accent: #a6535b;
+  --accent-soft: rgba(166, 83, 91, 0.13);
+  --warm: #e2a09b;
+  --shadow: 0 20px 60px rgba(126, 73, 68, 0.09);
 }
 
 * {
@@ -48,8 +48,8 @@ a {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 88% 0%, rgba(224, 177, 127, 0.25), transparent 29rem),
-    radial-gradient(circle at 0% 58%, rgba(197, 137, 109, 0.14), transparent 25rem);
+    radial-gradient(circle at 88% 0%, rgba(232, 169, 160, 0.26), transparent 29rem),
+    radial-gradient(circle at 0% 58%, rgba(197, 111, 114, 0.13), transparent 25rem);
 }
 
 .page-shell {
@@ -87,7 +87,7 @@ a {
 .header-link,
 .site-footer a,
 .text-link {
-  text-decoration-color: rgba(185, 111, 79, 0.45);
+  text-decoration-color: rgba(166, 83, 91, 0.45);
   text-underline-offset: 0.24em;
 }
 
@@ -120,7 +120,7 @@ a {
   width: 22rem;
   height: 22rem;
   border-radius: 50%;
-  background: rgba(220, 168, 116, 0.16);
+  background: rgba(226, 160, 155, 0.19);
   content: "";
 }
 
@@ -274,7 +274,7 @@ h2 {
 }
 
 .person-card:hover {
-  border-color: rgba(185, 111, 79, 0.45);
+  border-color: rgba(166, 83, 91, 0.45);
   background: var(--surface-hover);
   box-shadow: 0 10px 25px rgba(112, 79, 49, 0.09);
   transform: translateY(-3px);
