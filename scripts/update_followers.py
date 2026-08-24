@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Update the follower count in README.md and the thank-you page."""
+"""Update the README note and the follower section on the thank-you page."""
 
+from concurrent.futures import ThreadPoolExecutor
+from html import escape
 import json
 import os
 import re
+from urllib.parse import quote
 import urllib.error
 import urllib.request
 
@@ -14,33 +17,144 @@ README_PATH = os.path.join(ROOT_DIR, "README.md")
 PAGE_PATH = os.path.join(ROOT_DIR, "docs", "index.html")
 MARKERS_START = "<!-- FOLLOWERS-START -->"
 MARKERS_END = "<!-- FOLLOWERS-END -->"
+PER_PAGE = 100
 
 
-def fetch_follower_count(username: str, token: str | None = None) -> int:
-    """Fetch the public follower count for a GitHub user."""
-    request = urllib.request.Request(f"https://api.github.com/users/{username}")
+def github_json(url: str, token: str | None = None) -> dict | list:
+    """Fetch JSON from GitHub's public API."""
+    request = urllib.request.Request(url)
     request.add_header("Accept", "application/vnd.github+json")
-    request.add_header("User-Agent", f"{username}-readme-updater")
+    request.add_header("User-Agent", f"{GITHUB_USER}-readme-updater")
     if token:
         request.add_header("Authorization", f"Bearer {token}")
 
     try:
         with urllib.request.urlopen(request) as response:
-            data = json.loads(response.read().decode("utf-8"))
+            return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
         raise RuntimeError(f"GitHub API request failed with HTTP {error.code}") from error
     except (urllib.error.URLError, json.JSONDecodeError) as error:
-        raise RuntimeError("Could not read the follower count from GitHub") from error
+        raise RuntimeError("Could not read follower data from GitHub") from error
+
+
+def fetch_all_followers(username: str, token: str | None = None) -> list[dict]:
+    """Fetch every follower without relying on the API's display order."""
+    followers = []
+    page = 1
+
+    while True:
+        data = github_json(
+            f"https://api.github.com/users/{quote(username)}/followers"
+            f"?per_page={PER_PAGE}&page={page}",
+            token,
+        )
+        if not isinstance(data, list):
+            raise RuntimeError("GitHub returned an invalid followers response")
+
+        followers.extend(data)
+        if len(data) < PER_PAGE:
+            break
+        page += 1
+
+    return followers
+
+
+def fallback_profile(follower: dict) -> dict:
+    """Keep the useful fields available from the followers endpoint."""
+    login = str(follower.get("login", ""))
+    return {
+        "login": login,
+        "name": login,
+        "avatar_url": str(follower.get("avatar_url", "")),
+        "html_url": str(follower.get("html_url", f"https://github.com/{login}")),
+    }
+
+
+def fetch_profile(follower: dict, token: str | None) -> dict:
+    """Add the person's public display name when an API token is available."""
+    profile = fallback_profile(follower)
+    if not token or not profile["login"]:
+        return profile
 
     try:
-        count = int(data["followers"])
-    except (KeyError, TypeError, ValueError) as error:
-        raise RuntimeError("GitHub returned an invalid follower count") from error
+        data = github_json(
+            f"https://api.github.com/users/{quote(profile['login'])}",
+            token,
+        )
+    except RuntimeError:
+        return profile
 
-    if count < 0:
-        raise RuntimeError("GitHub returned a negative follower count")
+    if not isinstance(data, dict):
+        return profile
 
-    return count
+    profile["name"] = str(data.get("name") or profile["login"])
+    profile["avatar_url"] = str(data.get("avatar_url") or profile["avatar_url"])
+    profile["html_url"] = str(data.get("html_url") or profile["html_url"])
+    return profile
+
+
+def enrich_followers(followers: list[dict], token: str | None) -> list[dict]:
+    """Fetch display names in parallel while keeping API failures non-fatal."""
+    if not token:
+        return [fallback_profile(follower) for follower in followers]
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        return list(executor.map(lambda item: fetch_profile(item, token), followers))
+
+
+def generate_people_section(followers: list[dict]) -> str:
+    """Render a calm, compact grid of follower names, usernames, and avatars."""
+    people = sorted(
+        followers,
+        key=lambda person: (person["name"].casefold(), person["login"].casefold()),
+    )
+    cards = []
+
+    for index, person in enumerate(people):
+        name = escape(person["name"] or person["login"])
+        login = escape(person["login"])
+        avatar_url = escape(person["avatar_url"], quote=True)
+        profile_url = escape(person["html_url"], quote=True)
+        cards.append(
+            "  <a class=\"person-card\" href=\"{profile_url}\" "
+            "target=\"_blank\" rel=\"noreferrer\" style=\"--index: {index};\">\n"
+            "    <img src=\"{avatar_url}\" alt=\"{name} (@{login})\" "
+            "width=\"56\" height=\"56\" loading=\"lazy\" />\n"
+            "    <span class=\"person-meta\">\n"
+            "      <strong>{name}</strong>\n"
+            "      <span>@{login}</span>\n"
+            "    </span>\n"
+            "    <span class=\"person-arrow\" aria-hidden=\"true\">↗</span>\n"
+            "  </a>".format(
+                profile_url=profile_url,
+                index=index,
+                avatar_url=avatar_url,
+                name=name,
+                login=login,
+            )
+        )
+
+    cards_markup = "\n".join(cards)
+    return (
+        f"{MARKERS_START}\n"
+        "<section class=\"quiet-stat\" aria-label=\"Follower count\">\n"
+        "  <span class=\"stat-label\">At this point</span>\n"
+        "  <span class=\"stat-number\">" + str(len(people)) + "</span>\n"
+        "  <span class=\"stat-description\">people have chosen to keep an eye on the work.</span>\n"
+        "</section>\n\n"
+        "<section class=\"people-section\" aria-labelledby=\"people-title\">\n"
+        "  <div class=\"section-heading\">\n"
+        "    <p class=\"eyebrow\">The people</p>\n"
+        "    <h2 id=\"people-title\">Every name here means this work travelled a little further.</h2>\n"
+        "    <p>There is no ranking and no ceremony. Just a record of the people who chose to keep an eye on what I make.</p>\n"
+        "  </div>\n"
+        "  <p class=\"people-count\"><strong>" + str(len(people)) + "</strong> people, each with a place of their own.</p>\n"
+        "  <div class=\"people-grid\">\n"
+        f"{cards_markup}\n"
+        "  </div>\n"
+        "</section>\n"
+        f"{MARKERS_END}"
+    )
 
 
 def update_file(path: str, replacement: str) -> bool:
@@ -64,32 +178,24 @@ def update_file(path: str, replacement: str) -> bool:
     return True
 
 
-def update_follower_count(follower_count: int) -> bool:
-    """Update both public copies of the follower count."""
-    readme_block = (
-        f"{MARKERS_START}\n"
-        f"**{follower_count} people** are following along. Thanks for being here.\n"
-        f"{MARKERS_END}"
-    )
-    page_block = (
-        f"{MARKERS_START}\n"
-        f'<span class="follower-count">{follower_count}</span>\n'
-        f"{MARKERS_END}"
-    )
-
-    changed = update_file(README_PATH, readme_block)
-    changed = update_file(PAGE_PATH, page_block) or changed
-    return changed
-
-
 def main() -> None:
     token = os.environ.get("GITHUB_TOKEN")
-    follower_count = fetch_follower_count(GITHUB_USER, token)
+    raw_followers = fetch_all_followers(GITHUB_USER, token)
+    followers = enrich_followers(raw_followers, token)
+    count = len(followers)
 
-    if update_follower_count(follower_count):
-        print(f"Updated README.md and the thank-you page with {follower_count} followers.")
+    readme_block = (
+        f"{MARKERS_START}\n"
+        f"**{count} followers.** Thank you. [Read the note →](https://nhanaz.github.io/NhanAZ/)\n"
+        f"{MARKERS_END}"
+    )
+    changed_readme = update_file(README_PATH, readme_block)
+    changed_page = update_file(PAGE_PATH, generate_people_section(followers))
+
+    if changed_readme or changed_page:
+        print(f"Updated README.md and the thank-you page with {count} followers.")
     else:
-        print("Follower count is already up to date.")
+        print("Follower data is already up to date.")
 
 
 if __name__ == "__main__":

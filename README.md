@@ -13,12 +13,6 @@ If you'd like to get in touch, feel free to reach me on Discord at **NhanAZ**.
 
 ---
 
-## Thanks for following along
-
-Thanks to everyone who follows my work and supports these projects. It means a lot.
-
-I made a small [thank-you page](https://nhanaz.github.io/NhanAZ/) for everyone who follows along.
-
 <!-- FOLLOWERS-START -->
-**80 people** are following along. Thanks for being here.
+**80 followers.** Thank you. [Read the note →](https://nhanaz.github.io/NhanAZ/)
 <!-- FOLLOWERS-END -->
