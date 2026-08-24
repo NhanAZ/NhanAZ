@@ -124,7 +124,6 @@ def generate_people_section(followers: list[dict]) -> str:
             "      <strong>{name}</strong>\n"
             "      <span>@{login}</span>\n"
             "    </span>\n"
-            "    <span class=\"person-arrow\" aria-hidden=\"true\">↗</span>\n"
             "  </a>".format(
                 profile_url=profile_url,
                 index=index,
@@ -140,7 +139,7 @@ def generate_people_section(followers: list[dict]) -> str:
         "<section class=\"quiet-stat\" aria-label=\"Follower count\" data-reveal>\n"
         "  <span class=\"stat-label\">At this point</span>\n"
         "  <span class=\"stat-number\">" + str(len(people)) + "</span>\n"
-        "  <span class=\"stat-description\">people have chosen to keep an eye on the work.</span>\n"
+        "  <span class=\"stat-description\">people have chosen to keep an eye on the work, and I am quietly grateful that these small things found a place in their day.</span>\n"
         "</section>\n\n"
         "<section class=\"people-section\" aria-labelledby=\"people-title\" data-reveal>\n"
         "  <div class=\"section-heading\" data-reveal>\n"

@@ -93,14 +93,12 @@ a {
   font-size: 0.77rem;
 }
 
-.site-footer a,
-.text-link {
+.site-footer a {
   text-decoration-color: rgba(166, 83, 91, 0.45);
   text-underline-offset: 0.24em;
 }
 
-.site-footer a:hover,
-.text-link:hover {
+.site-footer a:hover {
   color: var(--accent);
 }
 
@@ -421,18 +419,6 @@ h2 {
   font-size: 0.74rem;
 }
 
-.person-arrow {
-  margin-left: auto;
-  color: var(--faint);
-  font-size: 0.85rem;
-  transition: color 220ms ease, transform 220ms var(--ease-spring);
-}
-
-.person-card:hover .person-arrow {
-  color: var(--accent);
-  transform: translate(2px, -2px);
-}
-
 .closing-note {
   max-width: 720px;
   padding: 4.5rem clamp(1.5rem, 5vw, 4rem) 5rem;
@@ -638,10 +624,6 @@ h2 {
 
   .person-meta span {
     font-size: 0.66rem;
-  }
-
-  .person-arrow {
-    display: none;
   }
 
   .closing-note {
