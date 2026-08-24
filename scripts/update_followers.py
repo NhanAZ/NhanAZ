@@ -59,7 +59,33 @@ def fetch_all_followers(username: str, token: str | None = None) -> list[dict]:
     return followers
 
 
-def fallback_profile(follower: dict) -> dict:
+def fetch_following_logins(username: str, token: str | None = None) -> set[str]:
+    """Fetch the accounts this user follows for mutual-follow detection."""
+    following = set()
+    page = 1
+
+    while True:
+        data = github_json(
+            f"https://api.github.com/users/{quote(username)}/following"
+            f"?per_page={PER_PAGE}&page={page}",
+            token,
+        )
+        if not isinstance(data, list):
+            raise RuntimeError("GitHub returned an invalid following response")
+
+        following.update(
+            str(person.get("login", "")).casefold()
+            for person in data
+            if person.get("login")
+        )
+        if len(data) < PER_PAGE:
+            break
+        page += 1
+
+    return following
+
+
+def fallback_profile(follower: dict, following_logins: set[str]) -> dict:
     """Keep the useful fields available from the followers endpoint."""
     login = str(follower.get("login", ""))
     return {
@@ -67,12 +93,13 @@ def fallback_profile(follower: dict) -> dict:
         "name": login,
         "avatar_url": str(follower.get("avatar_url", "")),
         "html_url": str(follower.get("html_url", f"https://github.com/{login}")),
+        "is_mutual": login.casefold() in following_logins,
     }
 
 
-def fetch_profile(follower: dict, token: str | None) -> dict:
+def fetch_profile(follower: dict, token: str | None, following_logins: set[str]) -> dict:
     """Add the person's public display name when an API token is available."""
-    profile = fallback_profile(follower)
+    profile = fallback_profile(follower, following_logins)
     if not token or not profile["login"]:
         return profile
 
@@ -93,20 +120,31 @@ def fetch_profile(follower: dict, token: str | None) -> dict:
     return profile
 
 
-def enrich_followers(followers: list[dict], token: str | None) -> list[dict]:
+def enrich_followers(
+    followers: list[dict], token: str | None, following_logins: set[str]
+) -> list[dict]:
     """Fetch display names in parallel while keeping API failures non-fatal."""
     if not token:
-        return [fallback_profile(follower) for follower in followers]
+        return [fallback_profile(follower, following_logins) for follower in followers]
 
     with ThreadPoolExecutor(max_workers=8) as executor:
-        return list(executor.map(lambda item: fetch_profile(item, token), followers))
+        return list(
+            executor.map(
+                lambda item: fetch_profile(item, token, following_logins),
+                followers,
+            )
+        )
 
 
 def generate_people_section(followers: list[dict]) -> str:
     """Render a calm, responsive grid of follower names, usernames, and avatars."""
     people = sorted(
         followers,
-        key=lambda person: (person["name"].casefold(), person["login"].casefold()),
+        key=lambda person: (
+            not person.get("is_mutual", False),
+            person["name"].casefold(),
+            person["login"].casefold(),
+        ),
     )
     cards = []
 
@@ -115,9 +153,12 @@ def generate_people_section(followers: list[dict]) -> str:
         login = escape(person["login"])
         avatar_url = escape(person["avatar_url"], quote=True)
         profile_url = escape(person["html_url"], quote=True)
+        is_mutual = person.get("is_mutual", False)
+        card_class = "person-card is-mutual" if is_mutual else "person-card"
+        mutual_attributes = ' data-mutual="true" title="Follows you back"' if is_mutual else ""
         cards.append(
-            "  <div class=\"person-card\" data-profile-url=\"{profile_url}\" "
-            "style=\"--index: {index}\">\n"
+            "  <div class=\"{card_class}\"{mutual_attributes} "
+            "data-profile-url=\"{profile_url}\" style=\"--index: {index}\">\n"
             "    <img src=\"{avatar_url}\" alt=\"{name} (@{login})\" "
             "width=\"56\" height=\"56\" loading=\"lazy\" />\n"
             "    <span class=\"person-meta\">\n"
@@ -126,6 +167,8 @@ def generate_people_section(followers: list[dict]) -> str:
             "target=\"_blank\" rel=\"noreferrer\">@{login}</a>\n"
             "    </span>\n"
             "  </div>".format(
+                card_class=card_class,
+                mutual_attributes=mutual_attributes,
                 profile_url=profile_url,
                 index=index,
                 avatar_url=avatar_url,
@@ -140,15 +183,15 @@ def generate_people_section(followers: list[dict]) -> str:
         "<section class=\"quiet-stat\" aria-label=\"Follower count\" data-reveal>\n"
         "  <span class=\"stat-label\">At this point</span>\n"
         "  <span class=\"stat-number\">" + str(len(people)) + "</span>\n"
-        "  <span class=\"stat-description\">people have chosen to keep an eye on the work, and I am quietly grateful.</span>\n"
+        "  <span class=\"stat-description\">people have chosen to keep an eye on the work. I am quietly grateful.</span>\n"
         "</section>\n\n"
         "<section class=\"people-section\" aria-labelledby=\"people-title\">\n"
         "  <div class=\"section-heading\" data-reveal>\n"
         "    <p class=\"eyebrow\">The people</p>\n"
-        "    <h2 id=\"people-title\">Every name here means the work found a little more room in the world.</h2>\n"
+        "    <h2 id=\"people-title\">Each name here is a quiet sign that the work reached someone.</h2>\n"
         "    <p>There is no ranking and no ceremony. Just the names of people who chose to keep an eye on what I make.</p>\n"
         "  </div>\n"
-        "  <p class=\"people-count\" data-reveal><strong>" + str(len(people)) + "</strong> people, each with a place of their own.</p>\n"
+        "  <p class=\"people-count\" data-reveal><strong>" + str(len(people)) + "</strong> people have given this work a place in their day.</p>\n"
         "  <div class=\"people-grid\">\n"
         f"{cards_markup}\n"
         "  </div>\n"
@@ -181,7 +224,11 @@ def update_file(path: str, replacement: str) -> bool:
 def main() -> None:
     token = os.environ.get("GITHUB_TOKEN")
     raw_followers = fetch_all_followers(GITHUB_USER, token)
-    followers = enrich_followers(raw_followers, token)
+    try:
+        following_logins = fetch_following_logins(GITHUB_USER, token)
+    except RuntimeError:
+        following_logins = set()
+    followers = enrich_followers(raw_followers, token, following_logins)
     count = len(followers)
 
     readme_block = (

@@ -3,17 +3,34 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
   const revealItems = [...document.querySelectorAll("[data-reveal]")]
   const counter = document.querySelector(".stat-number")
-  const followerCards = [...document.querySelectorAll(".person-card")]
+  const peopleGrid = document.querySelector(".people-grid")
+  const followerCards = [...document.querySelectorAll(".person-card")].sort((left, right) => {
+    const mutualDifference = Number(right.dataset.mutual === "true") - Number(left.dataset.mutual === "true")
+    if (mutualDifference) return mutualDifference
+
+    const leftName = left.querySelector(".person-meta strong")?.textContent.trim() || ""
+    const rightName = right.querySelector(".person-meta strong")?.textContent.trim() || ""
+    return leftName.localeCompare(rightName)
+  })
 
   root.classList.add("js")
 
-  followerCards.forEach(card => {
+  followerCards.forEach((card, index) => {
+    if (peopleGrid) peopleGrid.appendChild(card)
+    card.style.setProperty("--index", String(index))
+
+    if (card.dataset.mutual === "true") {
+      card.classList.add("is-mutual")
+      card.title = "Follows you back"
+    }
+
     const profileUrl = card.getAttribute("href") || card.dataset.profileUrl
     if (!profileUrl || card.tagName !== "A") return
 
     const panel = document.createElement("div")
     panel.className = card.className
     panel.style.cssText = card.style.cssText
+    panel.title = card.title
     panel.innerHTML = card.innerHTML
     card.replaceWith(panel)
 
