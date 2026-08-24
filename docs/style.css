@@ -141,9 +141,9 @@ a:focus-visible {
   --spot-y: 5%;
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-  gap: clamp(2.5rem, 8vw, 8rem);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
   min-height: 500px;
   margin-top: 0;
   padding: clamp(3.5rem, 8vw, 7rem) clamp(1.5rem, 6vw, 5.5rem) clamp(3.5rem, 8vw, 6rem);
@@ -179,6 +179,10 @@ a:focus-visible {
 .hero-aside {
   position: relative;
   z-index: 1;
+}
+
+.hero-copy {
+  max-width: 700px;
 }
 
 .hero-heart {
@@ -257,7 +261,7 @@ h1 {
 }
 
 .hero-aside {
-  max-width: 370px;
+  max-width: 640px;
   color: var(--muted);
   font-size: 1rem;
 }
@@ -311,10 +315,8 @@ h1 {
 }
 
 .section-heading {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.65fr) minmax(0, 1fr);
-  gap: 1rem 4rem;
-  align-items: start;
+  display: block;
+  max-width: 720px;
 }
 
 .section-heading .eyebrow {
@@ -331,8 +333,8 @@ h2 {
 }
 
 .section-heading > p:last-child {
-  max-width: 360px;
-  margin: 0.35rem 0 0;
+  max-width: 600px;
+  margin: 1.4rem 0 0;
   color: var(--muted);
 }
 
@@ -348,7 +350,7 @@ h2 {
 
 .people-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.65rem;
 }
 
@@ -562,7 +564,7 @@ h2 {
   }
 
   .people-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -615,10 +617,6 @@ h2 {
     white-space: normal;
   }
 
-  .section-heading {
-    display: block;
-  }
-
   .section-heading h2 {
     margin-bottom: 1.4rem;
   }
@@ -660,10 +658,6 @@ h2 {
 }
 
 @media (max-width: 420px) {
-  .people-grid {
-    grid-template-columns: 1fr;
-  }
-
   .person-card {
     padding: 0.6rem;
   }
