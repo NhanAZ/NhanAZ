@@ -420,7 +420,7 @@ h2 {
 }
 
 .closing-note {
-  max-width: 720px;
+  max-width: none;
   padding: 4.5rem clamp(1.5rem, 5vw, 4rem) 5rem;
   border: 1px solid var(--line);
   border-radius: 1.75rem;
