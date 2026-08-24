@@ -264,8 +264,6 @@ def render_person_card(person: dict, index: int, is_former: bool = False) -> str
     login = escape(person["login"])
     avatar_url = escape(person["avatar_url"], quote=True)
     profile_url = escape(person["html_url"], quote=True)
-    github_id = escape(str(numeric_github_id(person.get("github_id")) or "-"))
-    first_seen_at = escape(str(person.get("first_seen_at") or "-"))
     is_mutual = person.get("is_mutual", False) and not is_former
     classes = ["person-card"]
     attributes = []
@@ -286,7 +284,6 @@ def render_person_card(person: dict, index: int, is_former: bool = False) -> str
         "      <strong>{name}</strong>\n"
         "      <a class=\"person-username\" href=\"{profile_url}\" "
         "target=\"_blank\" rel=\"noreferrer\">@{login}</a>\n"
-        "      <span class=\"person-record\">ID {github_id} - First recorded {first_seen_at}</span>\n"
         "    </span>\n"
         "  </div>".format(
             classes=" ".join(classes),
@@ -296,8 +293,6 @@ def render_person_card(person: dict, index: int, is_former: bool = False) -> str
             avatar_url=avatar_url,
             name=name,
             login=login,
-            github_id=github_id,
-            first_seen_at=first_seen_at,
         )
     )
 

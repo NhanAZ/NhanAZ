@@ -489,13 +489,6 @@ h2 {
   font-size: 0.74rem;
 }
 
-.person-record {
-  color: var(--faint);
-  font-size: 0.61rem !important;
-  letter-spacing: 0.01em;
-  opacity: 0.82;
-}
-
 .person-card.is-former {
   background: rgba(255, 250, 243, 0.48);
 }
@@ -507,6 +500,10 @@ h2 {
 .person-username {
   display: inline-block;
   text-decoration: none;
+}
+
+.person-record {
+  display: none;
 }
 
 .person-username:hover {
