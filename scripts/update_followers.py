@@ -178,15 +178,15 @@ def generate_people_section(followers: list[dict]) -> str:
         "<section class=\"quiet-stat\" aria-label=\"Follower count\" data-reveal>\n"
         "  <span class=\"stat-label\">At this point</span>\n"
         "  <span class=\"stat-number\">" + str(len(people)) + "</span>\n"
-        "  <span class=\"stat-description\">people have chosen to keep an eye on the work. I am quietly grateful.</span>\n"
+        "  <span class=\"stat-description\">people have chosen to follow this journey, and each one gives me reason to continue.</span>\n"
         "</section>\n\n"
         "<section class=\"people-section\" aria-labelledby=\"people-title\">\n"
         "  <div class=\"section-heading\" data-reveal>\n"
         "    <p class=\"eyebrow\">The people</p>\n"
-        "    <h2 id=\"people-title\">Each name here is a quiet sign that the work reached someone.</h2>\n"
-        "    <p>These are the people who chose to keep an eye on the work, and I am grateful for each name here.</p>\n"
+        "    <h2 id=\"people-title\">Every name here marks a moment when this journey reached another person.</h2>\n"
+        "    <p>Some of you have been here for a while. Some have only just arrived. To every one of you, thank you for making room for this journey in your day.</p>\n"
         "  </div>\n"
-        "  <p class=\"people-count\" data-reveal><strong>" + str(len(people)) + "</strong> people have given this work a place in their day.</p>\n"
+        "  <p class=\"people-count\" data-reveal><strong>" + str(len(people)) + "</strong> people have given this journey a place in their day.</p>\n"
         "  <div class=\"people-grid\">\n"
         f"{cards_markup}\n"
         "  </div>\n"
@@ -228,7 +228,7 @@ def main() -> None:
 
     readme_block = (
         f"{MARKERS_START}\n"
-        f"**{count} followers.** Thank you for taking the time to follow the work. [A note of thanks →](https://nhanaz.github.io/NhanAZ/)\n"
+        f"**{count} followers.** Thank you for choosing to follow the journey. [A note of gratitude →](https://nhanaz.github.io/NhanAZ/)\n"
         f"{MARKERS_END}"
     )
     changed_readme = update_file(README_PATH, readme_block)
