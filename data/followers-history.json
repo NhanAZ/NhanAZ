@@ -169,7 +169,8 @@
         188559883,
         205768215,
         213860813,
-        251759976
+        251759976,
+        287352285
       ]
     }
   ],
@@ -892,6 +893,15 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/251759976?v=4",
       "html_url": "https://github.com/muchsandeep",
       "first_seen_at": null,
+      "last_seen_at": "2026-08-25"
+    },
+    {
+      "github_id": 287352285,
+      "login": "ancaferro",
+      "name": "Anca Kovach",
+      "avatar_url": "https://avatars.githubusercontent.com/u/287352285?v=4",
+      "html_url": "https://github.com/ancaferro",
+      "first_seen_at": "2026-08-25",
       "last_seen_at": "2026-08-25"
     }
   ]
