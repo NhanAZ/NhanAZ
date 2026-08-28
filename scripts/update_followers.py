@@ -199,11 +199,24 @@ def save_history(history: dict) -> bool:
 
 
 def update_history(history: dict, current_followers: list[dict], snapshot_date: str) -> list[dict]:
-    """Merge today's snapshot while keeping people who are no longer following."""
+    """Merge a changed follower snapshot while keeping former followers."""
     people = history.get("people", [])
     people_by_key = {person_key(person): person for person in people}
     is_initial_snapshot = not people_by_key
     current_by_key = {person_key(person): person for person in current_followers}
+    snapshots = history.get("snapshots", [])
+    latest_snapshot = snapshots[-1] if snapshots else None
+    previous_ids = {
+        numeric_github_id(github_id)
+        for github_id in (latest_snapshot or {}).get("github_ids", [])
+        if numeric_github_id(github_id)
+    }
+    current_ids = {
+        numeric_github_id(follower.get("github_id"))
+        for follower in current_followers
+        if numeric_github_id(follower.get("github_id"))
+    }
+    membership_changed = latest_snapshot is None or current_ids != previous_ids
 
     for follower in current_followers:
         key = person_key(follower)
@@ -228,23 +241,21 @@ def update_history(history: dict, current_followers: list[dict], snapshot_date: 
                     "name": follower["name"],
                     "avatar_url": follower["avatar_url"],
                     "html_url": follower["html_url"],
-                    "last_seen_at": snapshot_date,
                 }
             )
+            if membership_changed:
+                person["last_seen_at"] = snapshot_date
 
-    snapshot = {
-        "date": snapshot_date,
-        "github_ids": sorted(
-            numeric_github_id(follower.get("github_id"))
-            for follower in current_followers
-            if numeric_github_id(follower.get("github_id"))
-        ),
-    }
-    history["snapshots"] = [
-        item for item in history.get("snapshots", []) if item.get("date") != snapshot_date
-    ]
-    history["snapshots"].append(snapshot)
-    history["updated_at"] = snapshot_date
+    if membership_changed:
+        snapshot = {
+            "date": snapshot_date,
+            "github_ids": sorted(current_ids),
+        }
+        history["snapshots"] = [
+            item for item in snapshots if item.get("date") != snapshot_date
+        ]
+        history["snapshots"].append(snapshot)
+        history["updated_at"] = snapshot_date
     history["people"] = people
 
     rendered_people = []
