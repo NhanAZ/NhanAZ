@@ -14,5 +14,5 @@ If you'd like to get in touch, feel free to reach me on Discord at **NhanAZ**.
 ---
 
 <!-- FOLLOWERS-START -->
-**82 followers.** Thank you for choosing to follow the journey. [A note of gratitude →](https://nhanaz.github.io/NhanAZ/)
+**83 followers.** Thank you for choosing to follow the journey. [A note of gratitude →](https://nhanaz.github.io/NhanAZ/)
 <!-- FOLLOWERS-END -->
